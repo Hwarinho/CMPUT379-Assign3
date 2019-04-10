@@ -1,4 +1,5 @@
 // adapted from: https://gist.github.com/muhammedeminoglu/c69cabee84fd2d1fb3dcceb0d09344b7
+// Used for outputProgram in TLB simulator for tests.
 
 #include <stdio.h>
 #include <stdlib.h>
