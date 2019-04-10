@@ -29,7 +29,6 @@
 
 //define variables
 const char* policy;
-int flushPeriod;
 int pgsize;
 int tblsize;
 int totalReferences=0;
@@ -210,6 +209,7 @@ int main(int argc, char *argv[]){
     int i_flag =0;
     int f_flag =0;
     int p_flag =0;
+    int flushPeriod;
     
     //getopt on arguments in order to raise flags that the user is asking for certain features.
     while ((flag = getopt(argc, argv, "if:p:")) != -1){
