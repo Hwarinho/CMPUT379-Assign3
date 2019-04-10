@@ -1,8 +1,18 @@
 // adapted from: https://gist.github.com/muhammedeminoglu/c69cabee84fd2d1fb3dcceb0d09344b7
 
 #include <stdio.h>
+#include <stdlib.h>
 
 int myArray[1000000 - 1];
+
+void swapf(int x, int y)
+{
+    int temp;
+    temp = myArray[x];
+    myArray[x] = myArray[y];
+    myArray[y] = temp;
+
+}
 
 void bubbleSort(int x[], int number_of_elements)
 {
@@ -25,15 +35,6 @@ void printSorted(int number_of_elements)
     {
         printf("%d\n", myArray[i]);
     }
-}
-
-void swapf(int x, int y)
-{
-    int temp;
-    temp = myArray[x];
-    myArray[x] = myArray[y];
-    myArray[y] = temp;
-
 }
 
 void init(int number_of_elements)
@@ -62,4 +63,3 @@ int main( int argc, char *argv[])
     bubbleSort(myArray, number_of_elements);
     printSorted(number_of_elements);
 }
-
