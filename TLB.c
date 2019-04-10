@@ -7,15 +7,17 @@
 #include <string.h>
 #include <unistd.h>
 #include <getopt.h>
+#include <math.h>
 
 const char* policy;
 int flushPeriod;
 int pgsize;
 int tblsize;
-int tlbHitCount;
-int tlbMissCount;
+int totalReferences=0;
+int totalReferences_i=0;
+int tlbHitCount=0;
+int tlbMissCount=0;
 
-const unsigned pgsize_nbits = 16;
 char buf[100] = {0};
 char addr_str[9] = {0};
 unsigned int addr;
@@ -152,7 +154,9 @@ void LRU(Queue* queue, Hash* hash, unsigned pageNumber){
         reqPage->next->prev = reqPage; 
   
         queue->front = reqPage; 
-    } 
+    } else if (reqPage == queue->front){
+        tlbHitCount++;
+    }
 } 
 
 void FIFO(Queue* queue, Hash* hash, unsigned pageNumber){ 
@@ -175,6 +179,7 @@ int main(int argc, char *argv[]){
     int f_flag =0;
     int p_flag =0;
     
+
     while ((flag = getopt(argc, argv, "if:p:")) != -1){
         switch(flag){
             case 'i':
@@ -201,6 +206,9 @@ int main(int argc, char *argv[]){
     pgsize = atoi(argv[argc-2]);
     tblsize = atoi(argv[argc-1]);
 
+    const unsigned pgsize_nbits = log(pgsize)/log(2);
+    //printf("%d",pgsize_nbits);
+
     //not enough arguments provided by user.
     if ((argc <5) || (p_flag ==0)){
         printf("Not enough arguments for TLB.\n");
@@ -212,16 +220,19 @@ int main(int argc, char *argv[]){
         // The queue is the TLB table so set the queue size to the tlbsize 
         Queue* queue = createQueue(tblsize); 
   
-        //Possible number of pages is the hash for quick lookups.
-        Hash* hash = createHash(100000);
+        //Possible number of buckets in our modulo hash that the value might belong to.
+        Hash* hash = createHash(1000003); 
         
         int flushCount =0;
+        char *last_char;
         
         while (fgets(buf, sizeof(buf), stdin)) {
+            totalReferences++;
             if (buf[0] == '=')
                 continue;
             if (i_flag == 1){
                 if (buf[0] != 'I'){
+                    totalReferences_i++;
                     if (f_flag >0){
                         if (flushPeriod == flushCount){
                             while(!isQueueEmpty(queue)){
@@ -232,10 +243,16 @@ int main(int argc, char *argv[]){
                                 hash->array[i] = NULL; 
                         }
                     }
-                    strncpy(addr_str, buf + 3, 8);
+                    strncpy(addr_str, buf + 3, 50);
+
+                    last_char = strchr(addr_str, ',');
+                    if (last_char != NULL) {
+                        *last_char = '\0';
+                    }
+
                     sscanf(addr_str, "%x", &addr);
                     unsigned int pageNumber = addr >> pgsize_nbits;
-                    //printf("%x\n", pageNumber);
+                    pageNumber = pageNumber % 1000003;
                     FIFO(queue,hash,pageNumber);
                     
                     if(flushCount != flushPeriod){
@@ -257,12 +274,17 @@ int main(int argc, char *argv[]){
                             hash->array[i] = NULL; 
                     }
                 }
-        
-                strncpy(addr_str, buf + 3, 8);
+                strncpy(addr_str, buf + 3, 50);
+
+                last_char = strchr(addr_str, ',');
+                if (last_char != NULL) {
+                    *last_char = '\0';
+                }
+
                 sscanf(addr_str, "%x", &addr);
                 unsigned int pageNumber = addr >> pgsize_nbits;
+                pageNumber = pageNumber % 1000003;
                 FIFO(queue,hash,pageNumber);
-                //printf("%x\n", pageNumber);
 
                 if(flushCount != flushPeriod){
                     flushCount++;
@@ -276,31 +298,80 @@ int main(int argc, char *argv[]){
         // The queue is the TLB table so set the queue size to the tlbsize 
         Queue* queue = createQueue(tblsize); 
   
-        //Possible number of pages is the hash for quick lookups.
-        Hash* hash = createHash(100000); 
+        //Possible number of buckets in our modulo hash that the value might belong to.
+        Hash* hash = createHash(1000003); 
+
+        int flushCount =0;
+        char *last_char;
         
         while (fgets(buf, sizeof(buf), stdin)) {
+            totalReferences++;
             if (buf[0] == '=')
                 continue;
             if (i_flag == 1){
                 if (buf[0] != 'I'){
-                    strncpy(addr_str, buf + 3, 8);
+                    totalReferences_i++;
+                    if (f_flag >0){
+                        if (flushPeriod == flushCount){
+                            while(!isQueueEmpty(queue)){
+                                deQueue(queue);
+                            }
+                            int i; 
+                            for( i = 0; i < hash->capacity; ++i ) 
+                                hash->array[i] = NULL; 
+                        }
+                    }
+                    
+                    strncpy(addr_str, buf + 3, 50);
+
+                    last_char = strchr(addr_str, ',');
+                    if (last_char != NULL) {
+                        *last_char = '\0';
+                    }
+
                     sscanf(addr_str, "%x", &addr);
                     unsigned int pageNumber = addr >> pgsize_nbits;
+                    pageNumber = pageNumber % 1000003;
                     LRU(queue,hash,pageNumber);
-                    //printf ("%x\n", queue->front->pageNumber);
 
-
+                    if(flushCount != flushPeriod){
+                        flushCount++;
+                    } else if(flushCount == flushPeriod){
+                        flushCount =0;
+                    }
         
                     memset(buf, 0, 100);
                 }
             
             }else{
-                strncpy(addr_str, buf + 3, 8);
+                if (f_flag >0){
+                    if (flushPeriod == flushCount){
+                        while(!isQueueEmpty(queue)){
+                            deQueue(queue);
+                        }
+                        int i; 
+                        for( i = 0; i < hash->capacity; ++i ) 
+                            hash->array[i] = NULL; 
+                    }
+                }
+                strncpy(addr_str, buf + 3, 50);
+
+                last_char = strchr(addr_str, ',');
+                if (last_char != NULL) {
+                    *last_char = '\0';
+                }
+
                 sscanf(addr_str, "%x", &addr);
                 unsigned int pageNumber = addr >> pgsize_nbits;
+                pageNumber = pageNumber % 1000003;
                 LRU(queue,hash,pageNumber);
                 //printf ("%x\n", queue->front->pageNumber);
+
+                if(flushCount != flushPeriod){
+                    flushCount++;
+                } else if(flushCount == flushPeriod){
+                    flushCount =0;
+                }
                 
                 memset(buf, 0, 100);
                 
@@ -308,8 +379,28 @@ int main(int argc, char *argv[]){
         }
     
     }
-    printf("Hit Count: %d\n",tlbHitCount);
+
+    printf("\n");
+    if(i_flag >0){
+        printf("Total Reference: %d\n",totalReferences_i);    
+    }else if(i_flag ==0){
+        printf("Total Reference: %d\n",totalReferences);
+    }
     printf("Miss Count: %d\n",tlbMissCount);
+    printf("Hit Count: %d\n",tlbHitCount);
+
+    float miss_rate;
+
+    if(i_flag>0){
+        miss_rate = ((float) tlbMissCount/(float)totalReferences_i) *100;
+    }else if(i_flag==0){
+        miss_rate = ((float) tlbMissCount/(float) totalReferences) *100;
+    }   
+    printf("Miss rate: %f\n",miss_rate);
+
+    FILE *pFile;
+    pFile = fopen("statistics.txt", "a");
+    fprintf(pFile, "NIKITA IS A CUCKERDINHO" );
 
     return 0;
 }
