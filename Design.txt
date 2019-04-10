@@ -1,2 +1,14 @@
 Design Decisions:
 
+Code Decisions & tools:
+
+
+
+
+Graphing tools:
+We used gnuplot as shown in our labs to create the graphs. To cut down on the number of graphs made and to display meaningfull data we chose to to create a histogram with the y axis always the miss rate (%) and the x axis the programs and each bar in the program section is a variation that was run on the TLB. The Legend states the variation. This condenses the data but also allows us to show and draw meaningfull conclusions from the plots, with less plots. 
+
+Example Program 4 input choice:
+We chose our own example program to be bubble sort because we want to stay consistant in that all our input programs are sorting algorithims and we also needed another sorting algorithm with a different concept but a space complexity of 1. This allows us to easily and empiracally compare all the programs and make conclusions on the TLB with certain conditions applied. The main objective always was to minimize miss rate (%). 
+
+
