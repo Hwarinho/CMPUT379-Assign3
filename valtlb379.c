@@ -1,6 +1,22 @@
-//LinkedHashMap was NOT developed by oleg or nikita.
-//We found the LinkedHashMap on: https://www.geeksforgeeks.org/lru-cache-implementation/
-//Use of outside code is approved by Ioanis Nikolaidis.
+/*
+ * Translation Look-aside Buffer Simulator.
+ *      created by Oleg and Nikita.
+ */
+
+/* 
+ * Double-linked list with hash was NOT created by oleg or nikita.
+ * We found the DoubleLinkedHashMap on: https://www.geeksforgeeks.org/lru-cache-implementation/
+ * Use of outside code is approved by Ioanis Nikolaidis as confirmed by email
+ * We used the code for the data structure and the LRU. (the latter of which we edited for our purposes)
+ */
+
+/*
+ * Our Translation Look-aside Buffer Simulator can be run with the arguments: 
+ * valgrind --tool=lackey --trace-mem=yes ./outputProgram 2>&1 | ./valtlb379 -i -f (flush pero-p Po 16 32
+ * 
+ * 
+ * 
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
