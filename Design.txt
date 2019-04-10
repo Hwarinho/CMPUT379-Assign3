@@ -1,14 +1,20 @@
 Design Decisions:
+We used the following link for implementation as well as helping us make FIFO and LRU: This was no created by use. Use of outside code was approved by Dr.Nikolaidis by email.
+https://www.geeksforgeeks.org/lru-cache-implementation/
+
+Originally we wanted to implement a Linked List Queue in order to do storing and lookup for our TLB. We consulted with the teacher assistant Tobias in the Tuesday and he hinted at using a Hash table because the most common operation in the assignment is lookup and the lookup for a large queue as well as shifting the numbers around in the queue to dequeue is very time consuming. We decided to use a Double Linked List queue in order to keep the order of the pageNumbers and a Mod Hash Table in order to store our pageNumbers. The numbers would be enqueued at the front of the queue and also inserted the into the hash table under the bucket which they mod with. We choose 1,000,003 as the number of buckets in our hash table. This is because the chance of a collision is very low with a high number of buckets. We take mod 1,000,003 for each pageNumber and insert into the hash under this number. The queue is strictly used for FIFO and LRU orders so the Hash table took a load off the queue. We struggled implementing the data structure so therefore we asked Dr.Nikolaidis if it was alright for use to use some code found online as long as we sited it and he agreed. For FIFO, the program would check if the pageNumber existed in the Hash, if yes, then it was in our queue and we just increment TLBHitCount, if it wasn't, then we input it to the front of the queue which automatically dequeues the rear of the queue and we also inserted the pageNumber into the Hash table after performing the mod calculation (also increment TLBMissCount). For LRU, we would check if the pageNumber exists in the Hash table, if it doesn't, simply enqueue the value to the queue and insert it to Hash table as well as incrementing TLBMissCount. If it does exists and its NOT the first node, then unlink it from where it was and bring it up to the front of the queue (also increment TLBHitCount.) The last variation was if it was in the queue AND it was the first node, in that case, simply increment TLBHitCount and leave it. For each page size, we obtained the value for input, did the log base 2 calculation of this number, then bit shifted the unsigned int of the address we obtain the pageNumber for the address.
+
+Due to time constraints, we decided to not have sample sizes over 50,000 as inputs to our simulations. We chose 500, 5000, 50000 for our simulations, all to the same magnitude. 
 
 Code Decisions & tools:
+We used piping and redirection of command line programs to stream the output of several sorting programs into our TLB simulator. The piping was because we wanted to steam the addresses from valgrind into our TLB Simulator. The valgrind virtual addresses that we received can be up to 48bits long. We used a while loop and fgets in order to get the valgrind lines one at a time and perform bit shifting based on page size. We seperated code into 4 sections, FIFO w/instructions and without instructions as well as LRU w/instructions and without them. Flush is handles in all 4 parts. For page size shifting, we obtained virtual address stripped it of the first 3 characters and the last 2 characters. That way we were just left with the address which we could bit shift. Modularity in our code comes from the data structure. We ended up putting the 4 different scenarios and argument handling in our main function. 
 
-
-
+Data decisions: 
+All of our simulations were ran and the data was inputted into an excel sheet called 379stats which is included in our handin folder. Using the excel form, we build our graphs with ease.
 
 Graphing tools:
 We used gnuplot as shown in our labs to create the graphs. To cut down on the number of graphs made and to display meaningfull data we chose to to create a histogram with the y axis always the miss rate (%) and the x axis the programs and each bar in the program section is a variation that was run on the TLB. The Legend states the variation. This condenses the data but also allows us to show and draw meaningfull conclusions from the plots, with less plots. 
 
 Example Program 4 input choice:
 We chose our own example program to be bubble sort because we want to stay consistant in that all our input programs are sorting algorithims and we also needed another sorting algorithm with a different concept but a space complexity of 1. This allows us to easily and empiracally compare all the programs and make conclusions on the TLB with certain conditions applied. The main objective always was to minimize miss rate (%). 
-
 
