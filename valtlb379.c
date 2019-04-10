@@ -414,9 +414,5 @@ int main(int argc, char *argv[]){
     }   
     printf("Miss rate: %f\n",miss_rate);
 
-    FILE *pFile;
-    pFile = fopen("statistics.txt", "a");
-    fprintf(pFile, "NIKITA IS A CUCKERDINHO" );
-
     return 0;
 }
